@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="robots" content="noindex">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" href="data:;base64,=" />
+    <title></title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+        // 解析URL查詢字符串的函數
+        function parse(query) {
+            var qs = {}; // 初始化一個對象來存儲查詢參數
+            var i = query.indexOf('?'); // 找到查詢字符串的起始位置
+            if (i < 0 && query.indexOf('=') < 0) {
+                return qs; // 如果沒有查詢字符串，返回空對象
+            } else if (i >= 0) {
+                query = query.substring(i + 1); // 去掉問號，保留查詢參數
+            }
+
+            var parts = query.split('&'); // 根據&符號拆分查詢字符串
+            for (var n = 0; n < parts.length; n++) {
+                var part = parts[n];
+                var key = part.split('=')[0]; // 提取參數名
+                var val = part.split('=')[1]; // 提取參數值
+                key = key.toLowerCase(); // 將參數名轉為小寫
+                if (typeof qs[key] === 'undefined') {
+                    qs[key] = decodeURIComponent(val); // 如果參數名第一次出現，直接存儲
+                } else if (typeof qs[key] === 'string') {
+                    var arr = [qs[key], decodeURIComponent(val)]; // 如果參數名已存在，轉為數組
+                    qs[key] = arr;
+                } else {
+                    qs[key].push(decodeURIComponent(val)); // 如果已是數組，追加新值
+                }
+            }
+            return qs; // 返回解析後的查詢參數對象
+        }
+
+        // 初始化函數
+        function init() {
+            // 動態加載外部腳本loader.js
+            (function(m, ei, q, i, a, j, s) {
+                m[i] = m[i] || function() {
+                    (m[i].a = m[i].a || []).push(arguments); // 創建全局函數_m[i]
+                };
+                (j = ei.createElement(q)), (s = ei.getElementsByTagName(q)[0]);
+                j.async = true; // 設置為異步加載
+                j.charset = 'UTF-8'; // 設置字符集
+                j.src = 'https://static.meiqia.com/dist/meiqia.js'; // 設置腳本的完整URL
+                s.parentNode.insertBefore(j, s); // 插入腳本到文檔中
+            })(window, document, 'script', '_MEIQIA');
+
+            // 將URL中的HTML字符實體替換為相應字符
+            const url = window.location.search.replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&#39;/g, "'")
+                .replace(/&quot;/g, '"')
+                .replace(/<br\/>/g, '\n');
+
+            var data = parse(url); // 解析URL中的查詢參數
+            var entId = data.entid || data.eid; // 獲取企業ID
+
+            // 如果entId是數組，取第一個值
+            if (Object.prototype.toString.call(entId) === '[object Array]') {
+                entId = entId[0];
+            }
+
+            // 如果entId是純數字，轉為數字類型
+            if (/^\d+$/.test(entId)) {
+                entId = +entId;
+            }
+
+            // 設置聊天小部件的配置
+            _MEIQIA('_allowCheck', true);
+            _MEIQIA('entId', entId);
+            _MEIQIA('standalone', function(config) {
+                if (config.type === 'full') {
+                    document.body.style['background-color'] = '#fff';
+                    return;
+                }
+                if (config.color) {
+                    document.body.style['background-color'] = '#' + config.color;
+                }
+                if (config.url) {
+                    document.body.style['background-image'] = 'url(' + config.url + ')';
+                    document.body.style['background-repeat'] = 'no-repeat';
+                    document.body.style['background-size'] = '100% 100%';
+                }
+            });
+            _MEIQIA('withoutBtn');
+
+            // 處理metadata參數
+            if (data.metadata) {
+                try {
+                    var metadata = JSON.parse(data.metadata);
+                    _MEIQIA('metadata', metadata);
+                } catch (e) { }
+            }
+
+            // 處理加密的metadata參數
+            if (data.encryptedmetadata) {
+                _MEIQIA('encryptedMetadata', data.encryptedmetadata);
+            }
+
+            // 處理subsource參數
+            if (data.subsource) {
+                _MEIQIA('subSource', data.subsource);
+            }
+
+            // 處理語言設置
+            if (data.language) {
+                if (data.languagelocal !== 'true') {
+                    _MEIQIA('language', data.language);
+                }
+            }
+            if (data.languagelocal === 'true') {
+                _MEIQIA('languageLocal', true);
+            }
+
+            // 處理fallback參數
+            if (data.fallback) {
+                _MEIQIA('fallback', +data.fallback);
+            }
+
+            // 處理clientid參數
+            if (data.clientid) {
+                _MEIQIA('clientId', data.clientid);
+            }
+
+            // 處理agentid和groupid參數
+            if (data.agentid || data.groupid) {
+                _MEIQIA('assign', {
+                    agentToken: data.agentid || null,
+                    groupToken: data.groupid || null
+                });
+            }
+
+            // 再次處理fallback參數
+            if (data.fallback) {
+                _MEIQIA('fallback', data.fallback);
+            }
+
+            // 處理socketprotocol參數
+            if (data.socketprotocol) {
+                _MEIQIA('socketProtocol', data.socketprotocol);
+            }
+
+            // 顯示聊天面板並設置問候語、代理人和組信息
+            _MEIQIA('showPanel', {
+                greeting: data.greeting || '',
+                agentToken: data.agentid || null,
+                groupToken: data.groupid || null
+            });
+        }
+        init(); // 調用初始化函數
+    </script>
+</body>
+</html>
